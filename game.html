@@ -80,6 +80,7 @@ const gridData = [
 const words = ["APIRAX","ASPAVIX","ALTELYSE","RANOLAZE","AXABIN","TICALIX"];
 let foundWords = [], selectedCells = [], timeLeft = 90, timer, finalCode="";
 let hasWon = false; // پرچم برنده شدن
+let continueClicked = false; // پرچم ادامه بازی بعد از 3 دارو
 
 const grid = document.getElementById("grid");
 const wordList = document.getElementById("wordList");
@@ -141,7 +142,7 @@ grid.addEventListener("touchend", ()=>{
 
 // بررسی شرایط برد
 function checkWinCondition(){
-  if(foundWords.length===3 && !hasWon){ showPopupChoice(); }
+  if(foundWords.length>=3 && !hasWon && !continueClicked){ showPopupChoice(); }
   if(foundWords.length===6){ showWinnerPopup(); }
 }
 
@@ -157,7 +158,11 @@ function showPopupChoice(){
     </div>
   `;
   document.body.appendChild(popup);
-  document.getElementById("continueBtn").onclick=()=>popup.remove();
+  document.getElementById("continueBtn").onclick=()=>{
+    popup.remove();
+    continueClicked = true;
+    hasWon = true; // بعد از ادامه بازی هم برنده محسوب شود
+  };
   document.getElementById("finishBtn").onclick=()=>{ popup.remove(); showWinnerPopup(); };
 }
 
@@ -165,7 +170,7 @@ function showPopupChoice(){
 function showWinnerPopup(){
   clearInterval(timer);
   finalCode=Math.random().toString(36).substring(2,8).toUpperCase();
-  hasWon = true; // کاربر برنده شد
+  hasWon = true; 
   const popup=document.createElement("div"); popup.className="popup";
   popup.innerHTML=`
     <div class="popup-content">
@@ -190,7 +195,6 @@ timer=setInterval(()=>{
   if(timeLeft<=0){
     clearInterval(timer);
     if(hasWon){
-      // اگر قبلاً برنده شده، مستقیم به info.html
       window.location.href="info.html";
     } else {
       alert("⏰ زمان تمام شد! دوباره تلاش کن.");
