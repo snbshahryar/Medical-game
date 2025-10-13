@@ -3,59 +3,97 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ثبت اطلاعات شخصی</title>
-<link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css" rel="stylesheet">
+<title>📝 ثبت اطلاعات شخصی</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600&display=swap" rel="stylesheet">
 <style>
-body { 
-  font-family: 'Vazir', sans-serif; 
-  direction: rtl; 
-  background: #f0f7ff; 
-  text-align: center; 
-  padding: 20px; 
-}
-h1 { color: #0d6efd; margin-bottom:20px; }
-form { display: inline-block; text-align: right; margin-top: 20px; }
-label { display: block; margin: 10px 0 5px; font-weight: 600; }
-input, select { 
-  width: 250px; 
-  padding: 8px; 
-  border-radius: 6px; 
-  border: 1px solid #bbb; 
-  margin-bottom: 10px; 
-  font-family: 'Vazir', sans-serif;
-}
-#otherJob { display: none; }
-button { 
-  font-size: 18px; 
-  padding: 10px 20px; 
-  border: none; 
-  border-radius: 8px; 
-  background: #0d6efd; 
-  color: white; 
-  font-weight: 600; 
-  cursor: pointer; 
-  margin-top: 10px; 
-  font-family: 'Vazir', sans-serif;
-}
-.codeBox { 
-  margin-top: 20px; 
-  font-size: 22px; 
-  font-weight: bold; 
-  color: #0d6efd; 
-  font-family: 'Vazir', sans-serif;
-}
+  body { 
+    font-family: 'Vazirmatn', sans-serif; 
+    direction: rtl; 
+    background: #f0f7ff; 
+    text-align: center; 
+    padding: 20px; 
+  }
+
+  h1 { color: #0d6efd; }
+
+  form { 
+    display: inline-block; 
+    text-align: right; 
+    margin-top: 20px; 
+    background: #fff; 
+    padding: 25px 35px; 
+    border-radius: 16px; 
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+  }
+
+  label { display: block; margin: 10px 0 5px; font-weight: 600; }
+
+  input, select { 
+    width: 250px; 
+    padding: 8px; 
+    border-radius: 6px; 
+    border: 1px solid #bbb; 
+    margin-bottom: 10px; 
+    font-family: 'Vazirmatn', sans-serif;
+  }
+
+  #otherJob { display: none; }
+
+  button { 
+    font-size: 18px; 
+    padding: 10px 20px; 
+    border: none; 
+    border-radius: 8px; 
+    background: #0d6efd; 
+    color: white; 
+    font-weight: 600; 
+    cursor: pointer; 
+    margin-top: 10px; 
+    font-family: 'Vazirmatn', sans-serif;
+    transition: background 0.2s ease;
+  }
+
+  button:hover { background: #084298; }
+
+  .codeBox { 
+    margin-top: 20px; 
+    font-size: 20px; 
+    font-weight: bold; 
+    color: #0d6efd; 
+  }
+
+  #successMsg {
+    margin-top: 20px;
+    background: #b6f0b6;
+    color: #064f06;
+    font-weight: 600;
+    padding: 10px 15px;
+    border-radius: 8px;
+    display: none;
+  }
+
+  @media (max-width: 600px) {
+    form { width: 90%; padding: 20px; }
+    input, select { width: 100%; }
+    h1 { font-size: 22px; }
+    button { width: 100%; font-size: 16px; }
+  }
 </style>
 </head>
 <body>
 
 <h1>📝 ثبت اطلاعات شخصی</h1>
-<form id="infoForm">
+
+<form id="playerForm">
   <label>نام و نام خانوادگی:</label>
-  <input type="text" id="fullName" required>
+  <input type="text" id="name" required>
+
   <label>شماره تماس:</label>
   <input type="text" id="phone" required>
-  <label>شماره نظام:</label>
-  <input type="text" id="idNumber" required>
+
+  <label>شماره نظام پزشکی:</label>
+  <input type="text" id="medicalCode" required>
+
   <label>شغل:</label>
   <select id="job" required>
     <option value="">انتخاب کنید</option>
@@ -63,48 +101,70 @@ button {
     <option value="nurse">پرستار</option>
     <option value="other">سایر</option>
   </select>
-  <input type="text" id="otherJob" placeholder="لطفا شغل خود را وارد کنید">
-  <button type="submit">ثبت و دریافت کد یونیک</button>
+
+  <input type="text" id="otherJob" placeholder="لطفاً شغل خود را وارد کنید">
+
+  <button type="submit">ثبت و دریافت کد یونیک 🎯</button>
 </form>
 
+<div id="successMsg">✅ اطلاعات شما با موفقیت ثبت شد!</div>
 <div class="codeBox" id="finalCodeBox"></div>
 
 <script>
+// نمایش فیلد "سایر شغل‌ها"
 const jobSelect = document.getElementById("job");
 const otherJobInput = document.getElementById("otherJob");
-
 jobSelect.addEventListener("change", () => {
   otherJobInput.style.display = (jobSelect.value === "other") ? "block" : "none";
 });
 
-const form = document.getElementById("infoForm");
-const codeBox = document.getElementById("finalCodeBox");
+// آدرس Google Apps Script (برای ذخیره در شیت)
+const scriptURL = "https://script.google.com/macros/s/AKfycbycVB1G_8aZPD_bmpVVhLwFFvSI2hJKbyjW6hICo5wXtlSpFFc9rBld3uLVv9u0lAKx/exec";
 
-form.addEventListener("submit", (e) => {
+const form = document.getElementById("playerForm");
+const codeBox = document.getElementById("finalCodeBox");
+const successMsg = document.getElementById("successMsg");
+
+form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const fullName = document.getElementById("fullName").value.trim();
+  const fullName = document.getElementById("name").value.trim();
   const phone = document.getElementById("phone").value.trim();
-  const idNumber = document.getElementById("idNumber").value.trim();
+  const medicalCode = document.getElementById("medicalCode").value.trim();
   let job = jobSelect.value;
-  if (job === "other") { job = otherJobInput.value.trim() || "other"; }
+  if (job === "other") job = otherJobInput.value.trim() || "سایر";
 
-  let prefix = "S";
-  if (job === "doctor") prefix = "D";
-  else if (job === "nurse") prefix = "N";
+  // کد یونیک قبلی از localStorage
+  const uniqueCode = localStorage.getItem("tempCode") || Math.random().toString(36).substring(2, 8).toUpperCase();
 
-  const tempCode = localStorage.getItem("tempCode") || Math.random().toString(36).substring(2, 8).toUpperCase();
-  const finalCode = prefix + "-" + tempCode;
+  // ساخت داده برای ارسال
+  const data = {
+    name: fullName,
+    phone: phone,
+    medicalCode: medicalCode,
+    job: job,
+    code: uniqueCode
+  };
 
-  codeBox.textContent = "🎉 کد یونیک شما: " + finalCode;
+  try {
+    const res = await fetch(scriptURL, {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers: { "Content-Type": "application/json" }
+    });
 
-  // ذخیره اطلاعات در LocalStorage برای جمع‌آوری بعدی
-  let allUsers = JSON.parse(localStorage.getItem("allUsers") || "[]");
-  allUsers.push({ fullName, phone, idNumber, job, code: finalCode });
-  localStorage.setItem("allUsers", JSON.stringify(allUsers));
-
-  console.log({ fullName, phone, idNumber, job, code: finalCode });
-  alert("اطلاعات شما ثبت شد!");
+    if (res.ok) {
+      successMsg.style.display = "block";
+      codeBox.textContent = "🎉 کد یونیک شما: " + uniqueCode;
+      localStorage.removeItem("tempCode");
+      form.reset();
+    } else {
+      alert("❌ خطا در ارسال اطلاعات. لطفاً دوباره تلاش کنید.");
+    }
+  } catch (err) {
+    alert("⚠️ خطایی در ارتباط با سرور رخ داد.");
+    console.error(err);
+  }
 });
 </script>
 
