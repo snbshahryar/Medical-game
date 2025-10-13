@@ -92,18 +92,27 @@ words.forEach(w=>{ const span=document.createElement("span"); span.textContent=w
 // بروزرسانی لیست داروها
 function updateWordList(){ wordList.querySelectorAll("span").forEach(s=>{ if(foundWords.includes(s.textContent)) s.classList.add("foundWord"); })}
 
-// انتخاب با موس و لمس موبایل
+// بررسی انتخاب‌ها
+function checkSelection(){
+  const text=selectedCells.map(c=>c.textContent).join("").toUpperCase();
+  for(const word of words){
+    if(text===word && !foundWords.includes(word)){
+      foundWords.push(word);
+      selectedCells.forEach(c=>c.classList.add("found"));
+      break;
+    }
+  }
+  updateWordList();
+  checkWinCondition();
+  selectedCells.forEach(c => { if(!c.classList.contains("found")) c.classList.remove("selected"); });
+  selectedCells=[];
+}
+
+// انتخاب با موس
 let isMouseDown=false;
 grid.addEventListener("mousedown", e=>{ if(e.target.classList.contains("cell")){ isMouseDown=true; selectedCells=[e.target]; e.target.classList.add("selected"); }});
 grid.addEventListener("mouseover", e=>{ if(isMouseDown && e.target.classList.contains("cell") && !selectedCells.includes(e.target)){ selectedCells.push(e.target); e.target.classList.add("selected"); }});
-document.addEventListener("mouseup", ()=>{
-  if(isMouseDown){
-    // پاک کردن رنگ زرد سلول‌های اشتباه قبل از بررسی
-    selectedCells.forEach(c => { if(!c.classList.contains("found")) c.classList.remove("selected"); });
-    checkSelection();
-    isMouseDown=false;
-  }
-});
+document.addEventListener("mouseup", ()=>{ if(isMouseDown){ checkSelection(); isMouseDown=false; }});
 
 // لمس موبایل
 grid.addEventListener("touchstart", e=>{
@@ -118,25 +127,8 @@ grid.addEventListener("touchmove", e=>{
   if(el && el.classList.contains("cell") && !selectedCells.includes(el)){ selectedCells.push(el); el.classList.add("selected"); }
 });
 grid.addEventListener("touchend", ()=>{
-  // پاک کردن رنگ زرد سلول‌های اشتباه قبل از بررسی
-  selectedCells.forEach(c => { if(!c.classList.contains("found")) c.classList.remove("selected"); });
   checkSelection();
 });
-
-// بررسی انتخاب‌ها
-function checkSelection(){
-  const text=selectedCells.map(c=>c.textContent).join("").toUpperCase();
-  for(const word of words){
-    if(text===word && !foundWords.includes(word)){
-      foundWords.push(word);
-      selectedCells.forEach(c=>c.classList.add("found"));
-      break;
-    }
-  }
-  updateWordList();
-  checkWinCondition();
-  selectedCells=[];
-}
 
 // بررسی شرایط برد
 function checkWinCondition(){
