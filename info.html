@@ -6,44 +6,14 @@
 <title>ثبت اطلاعات شخصی</title>
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600&display=swap" rel="stylesheet">
 <style>
-  body { 
-    font-family: 'Vazirmatn', sans-serif; 
-    direction: rtl; 
-    background: #f0f7ff; 
-    text-align: center; 
-    padding: 20px; 
-  }
+  body { font-family: 'Vazirmatn', sans-serif; direction: rtl; background: #f0f7ff; text-align: center; padding: 20px; }
   h1 { color: #0d6efd; }
   form { display: inline-block; text-align: right; margin-top: 20px; }
   label { display: block; margin: 10px 0 5px; font-weight: 600; }
-  input, select { 
-    width: 250px; 
-    padding: 8px; 
-    border-radius: 6px; 
-    border: 1px solid #bbb; 
-    margin-bottom: 10px; 
-    font-family: 'Vazirmatn', sans-serif;
-  }
+  input, select { width: 250px; padding: 8px; border-radius: 6px; border: 1px solid #bbb; margin-bottom: 10px; font-family: 'Vazirmatn', sans-serif; }
   #otherJob { display: none; }
-  button { 
-    font-size: 18px; 
-    padding: 10px 20px; 
-    border: none; 
-    border-radius: 8px; 
-    background: #0d6efd; 
-    color: white; 
-    font-weight: 600; 
-    cursor: pointer; 
-    margin-top: 10px; 
-    font-family: 'Vazirmatn', sans-serif;
-  }
-  .codeBox { 
-    margin-top: 20px; 
-    font-size: 22px; 
-    font-weight: bold; 
-    color: #0d6efd; 
-    font-family: 'Vazirmatn', sans-serif;
-  }
+  button { font-size: 18px; padding: 10px 20px; border: none; border-radius: 8px; background: #0d6efd; color: white; font-weight: 600; cursor: pointer; margin-top: 10px; font-family: 'Vazirmatn', sans-serif; }
+  .codeBox { margin-top: 20px; font-size: 22px; font-weight: bold; color: #0d6efd; font-family: 'Vazirmatn', sans-serif; }
 </style>
 </head>
 <body>
@@ -78,7 +48,9 @@ jobSelect.addEventListener("change", () => {
 
 const form = document.getElementById("infoForm");
 const codeBox = document.getElementById("finalCodeBox");
-const scriptURL = "https://script.google.com/macros/s/AKfycbwPEsKcfNCqokFU_jpCR4oKdLdbwhcBAPknLiwMqUOreafENmvJSmnbWAfyn06eLAhN/exec";
+
+// لینک Web App گوگل شیت شما
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbwPEsKcfNCqokFU_jpCR4oKdLdbwhcBAPknLiwMqUOreafENmvJSmnbWAfyn06eLAhN/exec";
 
 form.addEventListener("submit", (e) => {
   e.preventDefault();
@@ -91,30 +63,32 @@ form.addEventListener("submit", (e) => {
 
   const tempCode = localStorage.getItem("tempCode") || Math.random().toString(36).substring(2, 8).toUpperCase();
   const finalCode = tempCode;
-
   codeBox.textContent = "🎉 کد یونیک شما: " + finalCode;
 
-  // ارسال اطلاعات به Google Sheet
-  const formData = new FormData();
-  formData.append("fullName", fullName);
-  formData.append("phone", phone);
-  formData.append("idNumber", idNumber);
-  formData.append("job", job);
-  formData.append("finalCode", finalCode);
-
-  fetch(scriptURL, { method: "POST", body: formData })
-    .then(resp => resp.json())
-    .then(data => {
-      if(data.status==="success") {
-        console.log("✅ اطلاعات با موفقیت ثبت شد!");
-        localStorage.removeItem("tempCode");
-      } else {
-        alert("⚠️ خطایی رخ داد: " + data.message);
-      }
+  // ارسال داده‌ها به گوگل شیت
+  fetch(SHEET_URL, {
+    method: "POST",
+    body: new URLSearchParams({
+      fullName: fullName,
+      phone: phone,
+      idNumber: idNumber,
+      job: job,
+      finalCode: finalCode
     })
-    .catch(() => {
-      alert("⚠️ خطایی در ارتباط با سرور رخ داد.");
-    });
+  })
+  .then(response => response.json())
+  .then(data => {
+    if(data.status === "success"){
+      console.log("اطلاعات با موفقیت ثبت شد.");
+    } else {
+      console.error("خطا در ثبت اطلاعات:", data.message);
+      alert("⚠️ خطایی در ثبت اطلاعات رخ داد. دوباره تلاش کنید.");
+    }
+  })
+  .catch(err => {
+    console.error("خطای شبکه:", err);
+    alert("⚠️ ارتباط با سرور برقرار نشد.");
+  });
 });
 </script>
 
