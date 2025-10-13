@@ -49,7 +49,7 @@ jobSelect.addEventListener("change", () => {
 const form = document.getElementById("infoForm");
 const codeBox = document.getElementById("finalCodeBox");
 
-// لینک Web App گوگل شیت شما
+// لینک Web App گوگل شیت
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbwPEsKcfNCqokFU_jpCR4oKdLdbwhcBAPknLiwMqUOreafENmvJSmnbWAfyn06eLAhN/exec";
 
 form.addEventListener("submit", (e) => {
@@ -61,8 +61,14 @@ form.addEventListener("submit", (e) => {
   let job = jobSelect.value;
   if (job === "other") { job = otherJobInput.value.trim() || "other"; }
 
+  // تعیین پیشوند براساس شغل
+  let prefix = "S";
+  if (jobSelect.value === "doctor") prefix = "D";
+  else if (jobSelect.value === "nurse") prefix = "N";
+
   const tempCode = localStorage.getItem("tempCode") || Math.random().toString(36).substring(2, 8).toUpperCase();
-  const finalCode = tempCode;
+  const finalCode = prefix + "-" + tempCode;  // اضافه کردن پیشوند
+
   codeBox.textContent = "🎉 کد یونیک شما: " + finalCode;
 
   // ارسال داده‌ها به گوگل شیت
