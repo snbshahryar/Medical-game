@@ -4,23 +4,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🎯 راهنمای بازی پیدا کردن نام دارو</title>
-<!-- فونت Vazirmatn -->
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css" rel="stylesheet">
 <style>
   body {
-    font-family: 'Vazirmatn', sans-serif;
+    font-family: 'Vazir', sans-serif;
     direction: rtl;
     background: linear-gradient(180deg, #e9f2ff, #ffffff);
     text-align: center;
-    padding: 50px 20px;
+    padding: 20px 10px;
     opacity: 1;
     transition: opacity 0.8s ease-in-out;
   }
-
   body.fade-out { opacity: 0; }
 
-  h1 { color: #0d6efd; margin-bottom: 20px; }
-  p { max-width: 600px; margin: 10px auto; font-size: 18px; line-height: 1.8; color: #333; }
+  h1 { color: #0d6efd; margin-bottom: 20px; font-family: 'Vazir', sans-serif; }
+  p { max-width: 600px; margin: 10px auto; font-size: 18px; line-height: 1.8; color: #333; font-family: 'Vazir', sans-serif; }
 
   .rules {
     background: #fff;
@@ -29,9 +27,11 @@
     border-radius: 16px;
     box-shadow: 0 0 15px rgba(0,0,0,0.1);
     text-align: right;
+    font-family: 'Vazir', sans-serif;
+    max-width: 95%;
   }
 
-  ul { text-align: right; display: inline-block; font-size: 17px; color: #444; }
+  ul { text-align: right; display: inline-block; font-size: 17px; color: #444; font-family: 'Vazir', sans-serif; }
   li { margin-bottom: 8px; }
 
   button {
@@ -44,11 +44,18 @@
     color: white;
     cursor: pointer;
     transition: all 0.2s ease;
-    font-family: 'Vazirmatn', sans-serif;
+    font-family: 'Vazir', sans-serif;
     font-weight: 600;
   }
 
   button:hover { background: #084298; transform: scale(1.05); }
+
+  @media (max-width: 600px){
+    h1 { font-size: 22px; }
+    button { font-size: 16px; padding: 10px 20px; }
+    p { font-size: 16px; }
+    ul { font-size: 15px; }
+  }
 </style>
 </head>
 <body>

@@ -4,39 +4,64 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>بازی پیدا کردن دارو</title>
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css" rel="stylesheet">
 <style>
-  body { font-family: 'Vazirmatn', sans-serif; direction: rtl; background: #f0f7ff; text-align:center; padding:20px; }
-  h1 { color: #0d6efd; }
+  body { font-family: 'Vazir', sans-serif; direction: rtl; background: #f0f7ff; text-align:center; padding:20px; }
+  h1 { color: #0d6efd; font-family: 'Vazir', sans-serif; }
 
   #grid {
-    display: grid; grid-template-columns: repeat(10, 40px); grid-gap: 5px;
-    margin: 20px auto; direction: ltr; justify-content: center;
+    display: grid; 
+    grid-template-columns: repeat(10, 1fr);
+    grid-gap: 5px;
+    margin: 20px auto; 
+    direction: ltr; 
+    max-width: 95%;
   }
 
-  .cell { width:40px; height:40px; border:1px solid #bbb; display:flex; align-items:center; justify-content:center;
-    font-weight:bold; background:#fff; cursor:pointer; user-select:none; border-radius:6px; transition: background 0.2s ease; text-align:center;
+  .cell { 
+    width: 100%; 
+    aspect-ratio: 1/1;
+    border:1px solid #bbb; 
+    display:flex; 
+    align-items:center; 
+    justify-content:center;
+    font-weight:bold; 
+    background:#fff; 
+    cursor:pointer; 
+    user-select:none; 
+    border-radius:6px; 
+    transition: background 0.2s ease; 
+    text-align:center; 
+    font-family: 'Vazir', sans-serif;
+    font-size: clamp(12px, 2vw, 20px);
   }
   .cell.selected { background:#ffe58f; }
   .cell.found { background:#b6f0b6; color:#065f06; }
 
-  #wordList { margin-top:30px; font-size:18px; }
-  #wordList span { display:inline-block; background:#eee; padding:5px 10px; margin:5px; border-radius:6px; }
-  #wordList .foundWord { background:#b6f0b6; color:#065f06; font-weight:bold; }
+  #wordList { margin-top:30px; font-size:18px; font-family: 'Vazir', sans-serif; }
+  #wordList span { display:inline-block; background:#eee; padding:5px 10px; margin:5px; border-radius:6px; font-family: 'Vazir', sans-serif; }
+  #wordList .foundWord { background:#b6f0b6; color:#065f06; font-weight:bold; font-family: 'Vazir', sans-serif; }
 
-  #timer { font-size:20px; margin-top:10px; color:#333; }
+  #timer { font-size:20px; margin-top:10px; color:#333; font-family: 'Vazir', sans-serif; }
 
   .popup { position:fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.5);
     display:flex; justify-content:center; align-items:center; z-index:999;
   }
   .popup-content { background:white; padding:30px; border-radius:20px; text-align:center; box-shadow:0 0 15px rgba(0,0,0,0.2);
-    animation: popIn 0.3s ease; font-family:'Vazirmatn',sans-serif;
+    animation: popIn 0.3s ease; font-family:'Vazir',sans-serif;
   }
   .popup-content button { margin:10px; font-size:18px; padding:10px 25px; border:none; border-radius:8px; cursor:pointer;
     background:#0d6efd; color:white; font-weight:600;
-    font-family: 'Vazirmatn', sans-serif; /* فونت Vazir */
+    font-family: 'Vazir', sans-serif;
   }
   @keyframes popIn { from { transform: scale(0.8); opacity:0; } to { transform: scale(1); opacity:1; } }
+
+  @media (max-width: 600px){
+    h1 { font-size: 22px; }
+    #wordList { font-size: 16px; }
+    .popup-content { padding: 20px; }
+    .popup-content button { font-size: 16px; padding: 8px 15px; }
+  }
 </style>
 </head>
 <body>
@@ -62,7 +87,6 @@ const gridData = [
 
 const words = ["APIRAX","ASPAVIX","ALTELYSE","RANOLAZE","AXABIN","TICALIX"];
 let foundWords = [], selectedCells = [], timeLeft = 90, timer, finalCode="";
-
 const grid = document.getElementById("grid");
 const wordList = document.getElementById("wordList");
 
@@ -84,7 +108,33 @@ function updateWordList(){ wordList.querySelectorAll("span").forEach(s=>{ if(fou
 let isMouseDown=false;
 grid.addEventListener("mousedown", e=>{ if(e.target.classList.contains("cell")){ isMouseDown=true; selectedCells=[e.target]; e.target.classList.add("selected"); }});
 grid.addEventListener("mouseover", e=>{ if(isMouseDown && e.target.classList.contains("cell") && !selectedCells.includes(e.target)){ selectedCells.push(e.target); e.target.classList.add("selected"); }});
-document.addEventListener("mouseup", ()=>{ if(isMouseDown){ checkSelection(); document.querySelectorAll(".selected").forEach(c=>c.classList.remove("selected")); isMouseDown=false; }});
+document.addEventListener("mouseup", ()=>{ if(isMouseDown){ checkSelection(); selectedCells.forEach(c=>c.classList.remove("selected")); isMouseDown=false; }});
+
+// پشتیبانی لمس موبایل
+grid.addEventListener("touchstart", e=>{
+  const touch = e.touches[0];
+  const target = document.elementFromPoint(touch.clientX, touch.clientY);
+  if(target && target.classList.contains("cell")){
+    selectedCells=[target];
+    target.classList.add("selected");
+    e.preventDefault();
+  }
+},{passive:false});
+
+grid.addEventListener("touchmove", e=>{
+  const touch = e.touches[0];
+  const target = document.elementFromPoint(touch.clientX, touch.clientY);
+  if(target && target.classList.contains("cell") && !selectedCells.includes(target)){
+    selectedCells.push(target);
+    target.classList.add("selected");
+  }
+},{passive:false});
+
+grid.addEventListener("touchend", e=>{
+  checkSelection();
+  selectedCells.forEach(c=>c.classList.remove("selected"));
+  selectedCells=[];
+});
 
 // بررسی انتخاب‌ها
 function checkSelection(){
@@ -120,9 +170,7 @@ function showPopupChoice(){
   `;
   document.body.appendChild(popup);
   document.getElementById("continueBtn").onclick=()=>popup.remove();
-  document.getElementById("finishBtn").onclick=()=>{
-    popup.remove(); showWinnerPopup();
-  };
+  document.getElementById("finishBtn").onclick=()=>{ popup.remove(); showWinnerPopup(); };
 }
 
 // پاپ‌آپ پایان بازی و تولید کد یونیک موقت
