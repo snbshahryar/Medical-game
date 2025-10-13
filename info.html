@@ -3,168 +3,129 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>📝 ثبت اطلاعات شخصی</title>
+<title>ثبت اطلاعات بازیکن</title>
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600&display=swap" rel="stylesheet">
 <style>
-  body { 
-    font-family: 'Vazirmatn', sans-serif; 
-    direction: rtl; 
-    background: #f0f7ff; 
-    text-align: center; 
-    padding: 20px; 
-  }
-
-  h1 { color: #0d6efd; }
-
-  form { 
-    display: inline-block; 
-    text-align: right; 
-    margin-top: 20px; 
-    background: #fff; 
-    padding: 25px 35px; 
-    border-radius: 16px; 
-    box-shadow: 0 0 15px rgba(0,0,0,0.1);
-  }
-
-  label { display: block; margin: 10px 0 5px; font-weight: 600; }
-
-  input, select { 
-    width: 250px; 
-    padding: 8px; 
-    border-radius: 6px; 
-    border: 1px solid #bbb; 
-    margin-bottom: 10px; 
+  body {
     font-family: 'Vazirmatn', sans-serif;
+    background: #f0f7ff;
+    direction: rtl;
+    text-align: center;
+    padding: 30px;
   }
-
-  #otherJob { display: none; }
-
-  button { 
-    font-size: 18px; 
-    padding: 10px 20px; 
-    border: none; 
-    border-radius: 8px; 
-    background: #0d6efd; 
-    color: white; 
-    font-weight: 600; 
-    cursor: pointer; 
-    margin-top: 10px; 
-    font-family: 'Vazirmatn', sans-serif;
-    transition: background 0.2s ease;
+  h1 {
+    color: #0d6efd;
   }
-
-  button:hover { background: #084298; }
-
-  .codeBox { 
-    margin-top: 20px; 
-    font-size: 20px; 
-    font-weight: bold; 
-    color: #0d6efd; 
+  form {
+    background: #fff;
+    padding: 25px;
+    border-radius: 16px;
+    max-width: 400px;
+    margin: 0 auto;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
   }
-
-  #successMsg {
-    margin-top: 20px;
-    background: #b6f0b6;
-    color: #064f06;
+  label {
+    display: block;
+    margin-top: 15px;
+    text-align: right;
     font-weight: 600;
-    padding: 10px 15px;
-    border-radius: 8px;
-    display: none;
   }
+  input, select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-family: 'Vazirmatn', sans-serif;
+  }
+  button {
+    margin-top: 20px;
+    background: #0d6efd;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    font-family: 'Vazirmatn', sans-serif;
+  }
+  button:hover {
+    background: #0b5ed7;
+  }
+  .success, .error {
+    margin-top: 20px;
+    font-weight: bold;
+  }
+  .success { color: green; }
+  .error { color: red; }
 
-  @media (max-width: 600px) {
-    form { width: 90%; padding: 20px; }
-    input, select { width: 100%; }
-    h1 { font-size: 22px; }
-    button { width: 100%; font-size: 16px; }
+  @media (max-width: 600px){
+    body { padding: 15px; }
+    form { padding: 20px; }
+    input, select, button { font-size: 15px; }
   }
 </style>
 </head>
 <body>
 
-<h1>📝 ثبت اطلاعات شخصی</h1>
+<h1>فرم ثبت اطلاعات بازیکن</h1>
 
-<form id="playerForm">
+<form id="infoForm">
   <label>نام و نام خانوادگی:</label>
-  <input type="text" id="name" required>
+  <input type="text" name="name" required>
 
-  <label>شماره تماس:</label>
-  <input type="text" id="phone" required>
+  <label>شماره تلفن:</label>
+  <input type="tel" name="phone" required>
 
-  <label>شماره نظام پزشکی:</label>
-  <input type="text" id="medicalCode" required>
+  <label>کد نظام پزشکی:</label>
+  <input type="text" name="medicalCode" required>
 
   <label>شغل:</label>
-  <select id="job" required>
+  <select name="job" required>
     <option value="">انتخاب کنید</option>
-    <option value="doctor">پزشک</option>
-    <option value="nurse">پرستار</option>
-    <option value="other">سایر</option>
+    <option>پزشک</option>
+    <option>داروساز</option>
+    <option>پرستار</option>
+    <option>سایر</option>
   </select>
 
-  <input type="text" id="otherJob" placeholder="لطفاً شغل خود را وارد کنید">
+  <input type="hidden" name="code" id="uniqueCode">
 
-  <button type="submit">ثبت و دریافت کد یونیک 🎯</button>
+  <button type="submit">ارسال اطلاعات</button>
+  <div id="status"></div>
 </form>
 
-<div id="successMsg">✅ اطلاعات شما با موفقیت ثبت شد!</div>
-<div class="codeBox" id="finalCodeBox"></div>
-
 <script>
-// نمایش فیلد "سایر شغل‌ها"
-const jobSelect = document.getElementById("job");
-const otherJobInput = document.getElementById("otherJob");
-jobSelect.addEventListener("change", () => {
-  otherJobInput.style.display = (jobSelect.value === "other") ? "block" : "none";
-});
+const scriptURL = "https://script.google.com/macros/s/AKfycbxt6_0PNWA6lbm2blAd0HiPMesE0fIiX4GEuRFajG_o4Kcof54cbmXKh7314XS7CoOG/exec";
 
-// آدرس Google Apps Script (برای ذخیره در شیت)
-const scriptURL = "https://script.google.com/macros/s/AKfycbycVB1G_8aZPD_bmpVVhLwFFvSI2hJKbyjW6hICo5wXtlSpFFc9rBld3uLVv9u0lAKx/exec";
+document.getElementById("uniqueCode").value = localStorage.getItem("tempCode") || "";
 
-const form = document.getElementById("playerForm");
-const codeBox = document.getElementById("finalCodeBox");
-const successMsg = document.getElementById("successMsg");
+const form = document.getElementById("infoForm");
+const statusDiv = document.getElementById("status");
 
-form.addEventListener("submit", async (e) => {
+form.addEventListener("submit", e => {
   e.preventDefault();
+  statusDiv.textContent = "در حال ارسال...";
+  statusDiv.className = "";
 
-  const fullName = document.getElementById("name").value.trim();
-  const phone = document.getElementById("phone").value.trim();
-  const medicalCode = document.getElementById("medicalCode").value.trim();
-  let job = jobSelect.value;
-  if (job === "other") job = otherJobInput.value.trim() || "سایر";
+  const formData = new FormData(form);
 
-  // کد یونیک قبلی از localStorage
-  const uniqueCode = localStorage.getItem("tempCode") || Math.random().toString(36).substring(2, 8).toUpperCase();
-
-  // ساخت داده برای ارسال
-  const data = {
-    name: fullName,
-    phone: phone,
-    medicalCode: medicalCode,
-    job: job,
-    code: uniqueCode
-  };
-
-  try {
-    const res = await fetch(scriptURL, {
-      method: "POST",
-      body: JSON.stringify(data),
-      headers: { "Content-Type": "application/json" }
+  fetch(scriptURL, { method: "POST", body: formData })
+    .then(res => {
+      if (res.ok) {
+        statusDiv.textContent = "✅ اطلاعات با موفقیت ثبت شد!";
+        statusDiv.className = "success";
+        form.reset();
+        localStorage.removeItem("tempCode");
+      } else {
+        throw new Error("خطا در ارسال داده‌ها");
+      }
+    })
+    .catch(err => {
+      statusDiv.textContent = "❌ خطا در ثبت اطلاعات. لطفاً دوباره تلاش کنید.";
+      statusDiv.className = "error";
+      console.error(err);
     });
-
-    if (res.ok) {
-      successMsg.style.display = "block";
-      codeBox.textContent = "🎉 کد یونیک شما: " + uniqueCode;
-      localStorage.removeItem("tempCode");
-      form.reset();
-    } else {
-      alert("❌ خطا در ارسال اطلاعات. لطفاً دوباره تلاش کنید.");
-    }
-  } catch (err) {
-    alert("⚠️ خطایی در ارتباط با سرور رخ داد.");
-    console.error(err);
-  }
 });
 </script>
 
