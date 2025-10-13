@@ -79,6 +79,7 @@ const gridData = [
 
 const words = ["APIRAX","ASPAVIX","ALTELYSE","RANOLAZE","AXABIN","TICALIX"];
 let foundWords = [], selectedCells = [], timeLeft = 90, timer, finalCode="";
+let hasWon = false; // پرچم برنده شدن
 
 const grid = document.getElementById("grid");
 const wordList = document.getElementById("wordList");
@@ -100,17 +101,19 @@ function updateWordList(){ wordList.querySelectorAll("span").forEach(s=>{ if(fou
 // بررسی انتخاب‌ها
 function checkSelection(){
   const text=selectedCells.map(c=>c.textContent).join("").toUpperCase();
+  let found=false;
   for(const word of words){
     if(text===word && !foundWords.includes(word)){
       foundWords.push(word);
       selectedCells.forEach(c=>c.classList.add("found"));
+      found=true;
       break;
     }
   }
-  updateWordList();
-  checkWinCondition();
   // حذف رنگ زرد سلول‌های اشتباه
   selectedCells.forEach(c => { if(!c.classList.contains("found")) c.classList.remove("selected"); });
+  updateWordList();
+  checkWinCondition();
   selectedCells=[];
 }
 
@@ -138,7 +141,7 @@ grid.addEventListener("touchend", ()=>{
 
 // بررسی شرایط برد
 function checkWinCondition(){
-  if(foundWords.length===3){ showPopupChoice(); }
+  if(foundWords.length===3 && !hasWon){ showPopupChoice(); }
   if(foundWords.length===6){ showWinnerPopup(); }
 }
 
@@ -162,6 +165,7 @@ function showPopupChoice(){
 function showWinnerPopup(){
   clearInterval(timer);
   finalCode=Math.random().toString(36).substring(2,8).toUpperCase();
+  hasWon = true; // کاربر برنده شد
   const popup=document.createElement("div"); popup.className="popup";
   popup.innerHTML=`
     <div class="popup-content">
@@ -171,7 +175,11 @@ function showWinnerPopup(){
     </div>
   `;
   document.body.appendChild(popup);
-  document.getElementById("nextBtn").onclick=()=>{ popup.remove(); localStorage.setItem("tempCode", finalCode); window.location.href="info.html"; };
+  document.getElementById("nextBtn").onclick=()=>{
+    popup.remove();
+    localStorage.setItem("tempCode", finalCode);
+    window.location.href="info.html";
+  };
 }
 
 // تایمر
@@ -179,7 +187,16 @@ const timerDisplay=document.getElementById("timer");
 timer=setInterval(()=>{
   timeLeft--;
   timerDisplay.innerText=`⏱️ زمان باقی‌مانده: ${timeLeft} ثانیه`;
-  if(timeLeft<=0){ clearInterval(timer); alert("⏰ زمان تمام شد! دوباره تلاش کن."); location.reload(); }
+  if(timeLeft<=0){
+    clearInterval(timer);
+    if(hasWon){
+      // اگر قبلاً برنده شده، مستقیم به info.html
+      window.location.href="info.html";
+    } else {
+      alert("⏰ زمان تمام شد! دوباره تلاش کن.");
+      location.reload();
+    }
+  }
 },1000);
 
 </script>
