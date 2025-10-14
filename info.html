@@ -14,6 +14,17 @@
   #otherJob { display: none; }
   button { font-size: 18px; padding: 10px 20px; border: none; border-radius: 8px; background: #0d6efd; color: white; font-weight: 600; cursor: pointer; margin-top: 10px; font-family: 'Vazirmatn', sans-serif; }
   .codeBox { margin-top: 20px; font-size: 22px; font-weight: bold; color: #0d6efd; font-family: 'Vazirmatn', sans-serif; }
+  .instruction {
+    margin-top: 15px;
+    font-size: 16px;
+    color: #000; /* متن مشکی */
+    line-height: 1.5;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+  }
+  .instruction a { color: #0d6efd; text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -38,64 +49,72 @@
 </form>
 
 <div class="codeBox" id="finalCodeBox"></div>
+<div class="instruction" id="instructionBox"></div>
 
 <script>
-const jobSelect = document.getElementById("job");
-const otherJobInput = document.getElementById("otherJob");
-jobSelect.addEventListener("change", () => {
-  otherJobInput.style.display = (jobSelect.value === "other") ? "block" : "none";
-});
+  // جلوگیری از برگشت به صفحه دوم
+  history.pushState(null, null, location.href);
+  window.onpopstate = function () { history.go(1); };
 
-const form = document.getElementById("infoForm");
-const codeBox = document.getElementById("finalCodeBox");
-
-// لینک Web App گوگل شیت
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbwPEsKcfNCqokFU_jpCR4oKdLdbwhcBAPknLiwMqUOreafENmvJSmnbWAfyn06eLAhN/exec";
-
-form.addEventListener("submit", (e) => {
-  e.preventDefault();
-  
-  const fullName = document.getElementById("fullName").value.trim();
-  const phone = document.getElementById("phone").value.trim();
-  const idNumber = document.getElementById("idNumber").value.trim();
-  let job = jobSelect.value;
-  if (job === "other") { job = otherJobInput.value.trim() || "other"; }
-
-  // تعیین پیشوند براساس شغل
-  let prefix = "S";
-  if (jobSelect.value === "doctor") prefix = "D";
-  else if (jobSelect.value === "nurse") prefix = "N";
-
-  const tempCode = localStorage.getItem("tempCode") || Math.random().toString(36).substring(2, 8).toUpperCase();
-  const finalCode = prefix + "-" + tempCode;  // اضافه کردن پیشوند
-
-  codeBox.textContent = "🎉 کد یونیک شما: " + finalCode;
-
-  // ارسال داده‌ها به گوگل شیت
-  fetch(SHEET_URL, {
-    method: "POST",
-    body: new URLSearchParams({
-      fullName: fullName,
-      phone: phone,
-      idNumber: idNumber,
-      job: job,
-      finalCode: finalCode
-    })
-  })
-  .then(response => response.json())
-  .then(data => {
-    if(data.status === "success"){
-      console.log("اطلاعات با موفقیت ثبت شد.");
-    } else {
-      console.error("خطا در ثبت اطلاعات:", data.message);
-      alert("⚠️ خطایی در ثبت اطلاعات رخ داد. دوباره تلاش کنید.");
-    }
-  })
-  .catch(err => {
-    console.error("خطای شبکه:", err);
-    alert("⚠️ ارتباط با سرور برقرار نشد.");
+  const jobSelect = document.getElementById("job");
+  const otherJobInput = document.getElementById("otherJob");
+  jobSelect.addEventListener("change", () => {
+    otherJobInput.style.display = (jobSelect.value === "other") ? "block" : "none";
   });
-});
+
+  const form = document.getElementById("infoForm");
+  const codeBox = document.getElementById("finalCodeBox");
+  const instructionBox = document.getElementById("instructionBox");
+
+  // لینک Web App گوگل شیت
+  const SHEET_URL = "https://script.google.com/macros/s/AKfycbwPEsKcfNCqokFU_jpCR4oKdLdbwhcBAPknLiwMqUOreafENmvJSmnbWAfyn06eLAhN/exec";
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    
+    const fullName = document.getElementById("fullName").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+    const idNumber = document.getElementById("idNumber").value.trim();
+    let job = jobSelect.value;
+    if (job === "other") { job = otherJobInput.value.trim() || "other"; }
+
+    // تعیین پیشوند براساس شغل
+    let prefix = "S";
+    if (jobSelect.value === "doctor") prefix = "D";
+    else if (jobSelect.value === "nurse") prefix = "N";
+
+    const tempCode = localStorage.getItem("tempCode") || Math.random().toString(36).substring(2, 8).toUpperCase();
+    const finalCode = prefix + "-" + tempCode;
+
+    codeBox.textContent = "🎉 کد یونیک شما: " + finalCode;
+
+    instructionBox.innerHTML = 'لطفا کد یونیک را از طریق دایرکت برای صفحه رسمی اینستاگرام <a href="https://www.instagram.com/arena_lifescience/" target="_blank">آرنا حیات دانش</a> ارسال کنید تا شانس خود را برای شرکت در قرعه کشی جوایز هیجان انگیز ما امتحان کنید.';
+
+    // ارسال داده‌ها به گوگل شیت
+    fetch(SHEET_URL, {
+      method: "POST",
+      body: new URLSearchParams({
+        fullName: fullName,
+        phone: phone,
+        idNumber: idNumber,
+        job: job,
+        finalCode: finalCode
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if(data.status === "success"){
+        console.log("اطلاعات با موفقیت ثبت شد.");
+      } else {
+        console.error("خطا در ثبت اطلاعات:", data.message);
+        alert("⚠️ خطایی در ثبت اطلاعات رخ داد. دوباره تلاش کنید.");
+      }
+    })
+    .catch(err => {
+      console.error("خطای شبکه:", err);
+      alert("⚠️ ارتباط با سرور برقرار نشد.");
+    });
+  });
 </script>
 
 </body>
