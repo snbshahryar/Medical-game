@@ -29,11 +29,11 @@ h1 { color: #0d6efd; margin-bottom:10px; }
 .cell.selected { background:#ffe58f; }
 .cell.found { background:#b6f0b6; color:#065f06; }
 
-#wordList { margin-top:30px; font-size:18px; text-align:center; }
+#wordList { margin-top:20px; font-size:18px; text-align:center; }
 #wordList span { display:inline-block; background:#eee; padding:5px 10px; margin:5px; border-radius:6px; }
 #wordList .foundWord { background:#b6f0b6; color:#065f06; font-weight:bold; }
 
-#timer { font-size:20px; margin-top:10px; color:#333; }
+#timer { font-size:20px; margin-top:5px; color:#333; }
 
 .popup { position:fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center; z-index:999; }
 .popup-content { background:white; padding:30px; border-radius:20px; text-align:center; box-shadow:0 0 15px rgba(0,0,0,0.2); animation: popIn 0.3s ease; font-family:'Vazirmatn',sans-serif; }
@@ -58,10 +58,9 @@ h1 { color: #0d6efd; margin-bottom:10px; }
 </head>
 <body>
 
-<h1>🧩 بازی پیدا کردن نام دارو</h1>
 <div id="timer">⏱️ زمان باقی‌مانده: 90 ثانیه</div>
 <div id="grid"></div>
-<div id="wordList"><h3>🔎 داروها را پیدا کن:</h3></div>
+<div id="wordList"></div>
 
 <script>
 const gridData = [
