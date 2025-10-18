@@ -29,6 +29,10 @@
     font-weight: 600; cursor: pointer;
     margin-top: 10px; font-family: 'Vazirmatn', sans-serif;
   }
+  button[disabled] {
+    background: gray;
+    cursor: not-allowed;
+  }
 
   /* ===== پاپ‌آپ ===== */
   .popup {
@@ -66,40 +70,44 @@
     color: #0d6efd;
     text-decoration: underline;
   }
-  .popup button {
-    margin-top: 15px;
-    background: #0d6efd;
-    color: white;
-    border: none;
-    padding: 8px 18px;
-    border-radius: 6px;
-    font-family: 'Vazirmatn', sans-serif;
-    cursor: pointer;
-  }
 
-  /* ✅ ریسپانسیو برای موبایل */
-  @media (max-width: 600px) {
-    .popup-content {
-      width: 85%;
-      padding: 18px 20px;
-      border-radius: 10px;
-      font-size: 14px;
-      margin: 40% auto; /* بالاتر در وسط صفحه موبایل */
-    }
-    .popup h2 {
-      font-size: 18px;
-    }
-    .popup p {
-      font-size: 13px;
-      line-height: 1.5;
-    }
-    #popupCode {
-      font-size: 18px !important;
-    }
-    .popup button {
-      padding: 6px 14px;
-      font-size: 14px;
-    }
+  /* بخش کد یونیک + دکمه کپی */
+  .code-box {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #eef6ff;
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-top: 8px;
+  }
+  #popupCode {
+    font-weight: bold;
+    font-size: 20px;
+    color: #0d6efd;
+    user-select: all;
+  }
+  #copyBtn {
+    background: #0d6efd;
+    border: none;
+    color: white;
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+  }
+  #copyBtn:hover { background: #0b5ed7; }
+  #copyMsg {
+    display: none;
+    color: green;
+    font-size: 14px;
+    margin-top: 5px;
+    animation: fade 1s ease-in-out;
+  }
+  @keyframes fade {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 </style>
 </head>
@@ -110,10 +118,16 @@
 <form id="infoForm">
   <label>نام و نام خانوادگی:</label>
   <input type="text" id="fullName" required>
+
   <label>شماره تماس:</label>
-  <input type="text" id="phone" required>
+  <input type="tel" id="phone" required pattern="^09[0-9]{9}$"
+    title="شماره موبایل باید به شکل نمونه وارد شود (مثال: 09121234567)"
+    placeholder="مثال: 09121234567">
+
   <label>شماره نظام:</label>
-  <input type="text" id="idNumber" required>
+  <input type="text" id="idNumber" required inputmode="numeric" pattern="\d+"
+    title="فقط عدد مجاز است" placeholder="کد نظام را وارد کنید">
+
   <label>شغل:</label>
   <select id="job" required>
     <option value="">انتخاب کنید</option>
@@ -122,81 +136,130 @@
     <option value="other">سایر</option>
   </select>
   <input type="text" id="otherJob" placeholder="لطفا شغل خود را وارد کنید">
-  <button type="submit">ثبت و دریافت کد یونیک</button>
+
+  <button type="submit" id="submitBtn">ثبت و دریافت کد یونیک</button>
 </form>
 
 <!-- پاپ‌آپ نمایش کد یونیک -->
 <div id="popup" class="popup">
   <div class="popup-content">
     <h2>🎉 کد یونیک شما</h2>
-    <p id="popupCode" style="font-weight:bold; font-size:20px; color:#0d6efd;"></p>
-    <p>جهت نهایی شدن مراحل قرعه کشی لازم است کد یونیک خود را از طریق دایرکت برای صفحه رسمی
+    <div class="code-box">
+      <span id="popupCode"></span>
+      <button id="copyBtn">📋 کپی</button>
+    </div>
+    <p id="copyMsg">✅ کد با موفقیت کپی شد!</p>
+    <p>
+      جهت نهایی شدن مراحل قرعه‌کشی لازم است کد یونیک خود را از طریق دایرکت برای صفحه رسمی
       <a href="https://www.instagram.com/arena_lifescience/" target="_blank">آرنا حیات دانش</a>
-      ارسال کنید تا شانس خود را برای شرکت در قرعه‌کشی جوایز هیجان‌انگیز ما امتحان کنید.
+      ارسال کنید.
     </p>
     <button id="closePopup">باشه</button>
   </div>
 </div>
 
 <script>
-  // جلوگیری از برگشت به صفحه دوم
-  history.pushState(null, null, location.href);
-  window.onpopstate = function () { history.go(1); };
+const jobSelect = document.getElementById("job");
+const otherJobInput = document.getElementById("otherJob");
+const form = document.getElementById("infoForm");
+const popup = document.getElementById("popup");
+const popupCode = document.getElementById("popupCode");
+const closePopup = document.getElementById("closePopup");
+const phoneInput = document.getElementById("phone");
+const idNumberInput = document.getElementById("idNumber");
+const copyBtn = document.getElementById("copyBtn");
+const copyMsg = document.getElementById("copyMsg");
+const submitBtn = document.getElementById("submitBtn");
 
-  const jobSelect = document.getElementById("job");
-  const otherJobInput = document.getElementById("otherJob");
-  jobSelect.addEventListener("change", () => {
-    otherJobInput.style.display = (jobSelect.value === "other") ? "block" : "none";
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbwPEsKcfNCqokFU_jpCR4oKdLdbwhcBAPknLiwMqUOreafENmvJSmnbWAfyn06eLAhN/exec";
+
+function normalizeDigits(input) {
+  let value = String(input).replace(/\s|-/g, '');
+  const persian = '۰۱۲۳۴۵۶۷۸۹';
+  const arabic  = '٠١٢٣٤٥٦٧٨٩';
+  value = value.replace(/[۰-۹]/g, d => '0123456789'[persian.indexOf(d)]);
+  value = value.replace(/[٠-٩]/g, d => '0123456789'[arabic.indexOf(d)]);
+  return value;
+}
+
+function isValidIranMobile(num) {
+  return /^09[0-9]{9}$/.test(num);
+}
+
+// تبدیل لحظه‌ای شماره موبایل به اعداد انگلیسی
+phoneInput.addEventListener("input", () => {
+  phoneInput.value = normalizeDigits(phoneInput.value).replace(/\D/g, '').slice(0, 11);
+});
+idNumberInput.addEventListener("input", () => {
+  idNumberInput.value = normalizeDigits(idNumberInput.value).replace(/\D/g, '');
+});
+jobSelect.addEventListener("change", () => {
+  otherJobInput.style.display = (jobSelect.value === "other") ? "block" : "none";
+});
+
+// اگر قبلاً ثبت کرده باشد
+const savedCode = localStorage.getItem("uniqueCode");
+if (savedCode) {
+  submitBtn.disabled = true;
+  popupCode.textContent = savedCode;
+  popup.style.display = "block";
+}
+
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  if (localStorage.getItem("uniqueCode")) {
+    alert("شما قبلاً ثبت‌نام کرده‌اید و کد یونیک دریافت کرده‌اید.");
+    return;
+  }
+
+  const fullName = document.getElementById("fullName").value.trim();
+  let idNumber = normalizeDigits(idNumberInput.value.trim()).replace(/\D/g, '');
+  let phone = normalizeDigits(phoneInput.value.trim()).replace(/\D/g, '');
+  let job = jobSelect.value;
+  if (job === "other") job = otherJobInput.value.trim() || "other";
+
+  if (!isValidIranMobile(phone)) {
+    alert("❌ لطفاً شماره موبایل معتبر وارد کنید (09xxxxxxxxx)");
+    phoneInput.focus();
+    return;
+  }
+
+  if (!/^\d+$/.test(idNumber) || idNumber === "") {
+    alert("❌ لطفاً شماره نظام را فقط با عدد وارد کنید.");
+    idNumberInput.focus();
+    return;
+  }
+
+  let prefix = "S";
+  if (jobSelect.value === "doctor") prefix = "D";
+  else if (jobSelect.value === "nurse") prefix = "N";
+
+  const tempCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+  const finalCode = prefix + "-" + tempCode;
+
+  popupCode.textContent = finalCode;
+  popup.style.display = "block";
+  submitBtn.disabled = true;
+  localStorage.setItem("uniqueCode", finalCode);
+
+  fetch(SHEET_URL, {
+    method: "POST",
+    body: new URLSearchParams({ fullName, phone, idNumber, job, finalCode })
+  })
+  .then(r => r.json())
+  .then(data => console.log("نتیجه:", data))
+  .catch(err => console.error("خطا:", err));
+});
+
+copyBtn.addEventListener("click", () => {
+  const code = popupCode.textContent.trim();
+  navigator.clipboard.writeText(code).then(() => {
+    copyMsg.style.display = "block";
+    setTimeout(() => (copyMsg.style.display = "none"), 2000);
   });
-
-  const form = document.getElementById("infoForm");
-  const popup = document.getElementById("popup");
-  const popupCode = document.getElementById("popupCode");
-  const closePopup = document.getElementById("closePopup");
-
-  const SHEET_URL = "https://script.google.com/macros/s/AKfycbwPEsKcfNCqokFU_jpCR4oKdLdbwhcBAPknLiwMqUOreafENmvJSmnbWAfyn06eLAhN/exec";
-
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-
-    const fullName = document.getElementById("fullName").value.trim();
-    const phone = document.getElementById("phone").value.trim();
-    const idNumber = document.getElementById("idNumber").value.trim();
-    let job = jobSelect.value;
-    if (job === "other") job = otherJobInput.value.trim() || "other";
-
-    let prefix = "S";
-    if (jobSelect.value === "doctor") prefix = "D";
-    else if (jobSelect.value === "nurse") prefix = "N";
-
-    const tempCode = localStorage.getItem("tempCode") || Math.random().toString(36).substring(2, 8).toUpperCase();
-    const finalCode = prefix + "-" + tempCode;
-
-    // نمایش در پاپ‌آپ
-    popupCode.textContent = finalCode;
-    popup.style.display = "block";
-
-    // ارسال داده‌ها به گوگل شیت
-    fetch(SHEET_URL, {
-      method: "POST",
-      body: new URLSearchParams({
-        fullName, phone, idNumber, job, finalCode
-      })
-    })
-    .then(r => r.json())
-    .then(data => console.log("نتیجه:", data))
-    .catch(err => console.error("خطا:", err));
-  });
-
-  // بستن پاپ‌آپ
-  closePopup.addEventListener("click", () => {
-    popup.style.display = "none";
-  });
-
-  // بستن با کلیک بیرون
-  window.onclick = function(event) {
-    if (event.target === popup) popup.style.display = "none";
-  };
+});
+closePopup.addEventListener("click", () => popup.style.display = "none");
 </script>
 
 </body>
