@@ -55,7 +55,7 @@
   }
   .popup h2 { color: #0d6efd; margin-bottom: 10px; }
   .popup p { color: #000; line-height: 1.6; font-size: 15px; }
-  .popup a { color: #0d6efd; text-decoration: underline; }
+  .popup a { color: #0d6efd; text-decoration: none; }
   
   #codeContainer {
     display: flex;
@@ -120,16 +120,13 @@
     <h2>🎉 کد یونیک شما</h2>
     <div id="codeContainer">
       <p id="popupCode"></p>
-      <!-- آیکون کپی -->
       <svg id="copyIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
         <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
       </svg>
     </div>
-    <p>جهت نهایی شدن مراحل قرعه کشی لازم است کد یونیک خود را از طریق دایرکت برای صفحه رسمی
-      <a href="https://www.instagram.com/arena_lifescience/" target="_blank">آرنا حیات دانش</a>
-      ارسال کنید تا شانس خود را برای شرکت در قرعه‌کشی جوایز هیجان‌انگیز ما امتحان کنید.
+    <p>جهت نهایی شدن مراحل قرعه کشی لازم است کد یونیک خود را پس از کپی نمودن زیر پست اینستاگرامی زیر کامنت کنید<br>
+      <a href="https://www.instagram.com/arena_lifescience/" target="_blank">لینک پست</a>
     </p>
-    <button id="closePopup">باشه</button>
   </div>
 </div>
 
@@ -144,7 +141,6 @@
   const form = document.getElementById("infoForm");
   const popup = document.getElementById("popup");
   const popupCode = document.getElementById("popupCode");
-  const closePopup = document.getElementById("closePopup");
   const copyIcon = document.getElementById("copyIcon");
 
   const SHEET_URL = "https://script.google.com/macros/s/AKfycbwPEsKcfNCqokFU_jpCR4oKdLdbwhcBAPknLiwMqUOreafENmvJSmnbWAfyn06eLAhN/exec";
@@ -190,7 +186,6 @@
     let prefix = "S";
     if (jobSelect.value === "doctor") prefix = "D";
     else if (jobSelect.value === "nurse") prefix = "N";
-
     const tempCode = Math.random().toString(36).substring(2, 8).toUpperCase();
     const finalCode = prefix + "-" + tempCode;
 
@@ -206,13 +201,9 @@
       .then(r => r.json()).then(data => console.log("نتیجه:", data)).catch(err => console.error("خطا:", err));
   });
 
-  closePopup.addEventListener("click", () => { popup.style.display = "none"; });
-  window.onclick = (event) => { if (event.target === popup) popup.style.display = "none"; };
-
   copyIcon.addEventListener("click", () => {
-    navigator.clipboard.writeText(popupCode.textContent).then(() => {
-      alert("✅ کد یونیک کپی شد!");
-    }).catch(() => alert("❌ خطا در کپی کردن کد!"));
+    navigator.clipboard.writeText(popupCode.textContent).then(() => alert("✅ کد یونیک کپی شد!"))
+    .catch(() => alert("❌ خطا در کپی کردن کد!"));
   });
 </script>
 
