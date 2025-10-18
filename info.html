@@ -77,7 +77,7 @@
     cursor: pointer;
   }
 
-  /* ✅ ریسپانسیو برای موبایل */
+  /* ریسپانسیو موبایل */
   @media (max-width: 600px) {
     .popup-content {
       width: 85%;
@@ -86,20 +86,11 @@
       font-size: 14px;
       margin: 40% auto;
     }
-    .popup h2 {
-      font-size: 18px;
-    }
-    .popup p {
-      font-size: 13px;
-      line-height: 1.5;
-    }
-    #popupCode {
-      font-size: 18px !important;
-    }
-    .popup button {
-      padding: 6px 14px;
-      font-size: 14px;
-    }
+    .popup h2 { font-size: 18px; }
+    .popup p { font-size: 13px; line-height: 1.5; }
+    #popupCode { font-size: 18px !important; }
+    .popup button { padding: 6px 14px; font-size: 14px; }
+    input, select { width: 200px; }
   }
 </style>
 </head>
@@ -122,7 +113,7 @@
   >
 
   <label>شماره نظام:</label>
-  <input type="text" id="idNumber" required>
+  <input type="text" id="idNumber" required placeholder="فقط اعداد">
 
   <label>شغل:</label>
   <select id="job" required>
@@ -156,19 +147,19 @@
 
   const jobSelect = document.getElementById("job");
   const otherJobInput = document.getElementById("otherJob");
-  jobSelect.addEventListener("change", () => {
-    otherJobInput.style.display = (jobSelect.value === "other") ? "block" : "none";
-  });
-
+  const idInput = document.getElementById("idNumber");
+  const phoneInput = document.getElementById("phone");
   const form = document.getElementById("infoForm");
   const popup = document.getElementById("popup");
   const popupCode = document.getElementById("popupCode");
   const closePopup = document.getElementById("closePopup");
-  const phoneInput = document.getElementById("phone");
 
   const SHEET_URL = "https://script.google.com/macros/s/AKfycbwPEsKcfNCqokFU_jpCR4oKdLdbwhcBAPknLiwMqUOreafENmvJSmnbWAfyn06eLAhN/exec";
 
-  // --- نرمال‌سازی ارقام فارسی و حذف فاصله/خط ---
+  jobSelect.addEventListener("change", () => {
+    otherJobInput.style.display = (jobSelect.value === "other") ? "block" : "none";
+  });
+
   function normalizePhone(input) {
     let value = input.replace(/\s|-/g, '');
     const persian = '۰۱۲۳۴۵۶۷۸۹';
@@ -186,11 +177,18 @@
     e.preventDefault();
 
     const fullName = document.getElementById("fullName").value.trim();
-    const idNumber = document.getElementById("idNumber").value.trim();
+    let idNumber = idInput.value.trim();
     let job = jobSelect.value;
     if (job === "other") job = otherJobInput.value.trim() || "other";
 
-    // --- بررسی شماره موبایل ---
+    // شماره نظام فقط عدد
+    if (!/^\d+$/.test(idNumber)) {
+      alert("❌ شماره نظام فقط می‌تواند شامل اعداد باشد!");
+      idInput.focus();
+      return;
+    }
+
+    // شماره موبایل
     let phone = normalizePhone(phoneInput.value.trim());
     if (!isValidIranMobile(phone)) {
       alert("❌ لطفاً شماره موبایل معتبر وارد کنید (فرمت صحیح: 09xxxxxxxxx)");
@@ -198,7 +196,7 @@
       return;
     }
 
-    // --- تولید و نمایش کد ---
+    // تولید کد یونیک
     let prefix = "S";
     if (jobSelect.value === "doctor") prefix = "D";
     else if (jobSelect.value === "nurse") prefix = "N";
@@ -206,10 +204,11 @@
     const tempCode = localStorage.getItem("tempCode") || Math.random().toString(36).substring(2, 8).toUpperCase();
     const finalCode = prefix + "-" + tempCode;
 
+    // نمایش پاپ‌آپ
     popupCode.textContent = finalCode;
     popup.style.display = "block";
 
-    // --- ارسال به گوگل شیت ---
+    // ارسال به گوگل شیت
     fetch(SHEET_URL, {
       method: "POST",
       body: new URLSearchParams({ fullName, phone, idNumber, job, finalCode })
@@ -219,13 +218,8 @@
     .catch(err => console.error("خطا:", err));
   });
 
-  closePopup.addEventListener("click", () => {
-    popup.style.display = "none";
-  });
-
-  window.onclick = function(event) {
-    if (event.target === popup) popup.style.display = "none";
-  };
+  closePopup.addEventListener("click", () => { popup.style.display = "none"; });
+  window.onclick = (event) => { if (event.target === popup) popup.style.display = "none"; };
 </script>
 
 </body>
