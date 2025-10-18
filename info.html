@@ -66,7 +66,7 @@
     color: #0d6efd;
     text-decoration: underline;
   }
-  .popup button {
+  .popup button, #copyBtn {
     margin-top: 15px;
     background: #0d6efd;
     color: white;
@@ -76,13 +76,21 @@
     font-family: 'Vazirmatn', sans-serif;
     cursor: pointer;
   }
+  #codeContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
 
   @media (max-width: 600px) {
     .popup-content { width: 85%; padding: 18px 20px; border-radius: 10px; font-size: 14px; margin: 40% auto; }
     .popup h2 { font-size: 18px; }
     .popup p { font-size: 13px; line-height: 1.5; }
     #popupCode { font-size: 18px !important; }
-    .popup button { padding: 6px 14px; font-size: 14px; }
+    .popup button, #copyBtn { padding: 6px 14px; font-size: 14px; }
     input, select { width: 200px; }
   }
 </style>
@@ -124,7 +132,10 @@
 <div id="popup" class="popup">
   <div class="popup-content">
     <h2>🎉 کد یونیک شما</h2>
-    <p id="popupCode" style="font-weight:bold; font-size:20px; color:#0d6efd;"></p>
+    <div id="codeContainer">
+      <p id="popupCode" style="font-weight:bold; font-size:20px; color:#0d6efd; margin:0;"></p>
+      <button id="copyBtn">کپی</button>
+    </div>
     <p>جهت نهایی شدن مراحل قرعه کشی لازم است کد یونیک خود را از طریق دایرکت برای صفحه رسمی
       <a href="https://www.instagram.com/arena_lifescience/" target="_blank">آرنا حیات دانش</a>
       ارسال کنید تا شانس خود را برای شرکت در قرعه‌کشی جوایز هیجان‌انگیز ما امتحان کنید.
@@ -134,7 +145,6 @@
 </div>
 
 <script>
-  // جلوگیری از برگشت به صفحه دوم
   history.pushState(null, null, location.href);
   window.onpopstate = () => { history.go(1); };
 
@@ -146,6 +156,7 @@
   const popup = document.getElementById("popup");
   const popupCode = document.getElementById("popupCode");
   const closePopup = document.getElementById("closePopup");
+  const copyBtn = document.getElementById("copyBtn");
 
   const SHEET_URL = "https://script.google.com/macros/s/AKfycbwPEsKcfNCqokFU_jpCR4oKdLdbwhcBAPknLiwMqUOreafENmvJSmnbWAfyn06eLAhN/exec";
 
@@ -164,7 +175,6 @@
 
   function isValidIranMobile(num) { return /^09\d{9}$/.test(num); }
 
-  // لیست محلی برای جلوگیری از تکراری‌ها
   const usedPhones = JSON.parse(localStorage.getItem("usedPhones") || "[]");
   const usedIdNumbers = JSON.parse(localStorage.getItem("usedIdNumbers") || "[]");
 
@@ -176,14 +186,12 @@
     let job = jobSelect.value;
     if (job === "other") job = otherJobInput.value.trim() || "other";
 
-    // شماره نظام فقط عدد
     if (!/^\d+$/.test(idNumber)) {
       alert("❌ شماره نظام فقط می‌تواند شامل اعداد باشد!");
       idInput.focus();
       return;
     }
 
-    // شماره موبایل
     let phone = normalizePhone(phoneInput.value.trim());
     if (!isValidIranMobile(phone)) {
       alert("❌ لطفاً شماره موبایل معتبر وارد کنید (فرمت صحیح: 09xxxxxxxxx)");
@@ -191,7 +199,6 @@
       return;
     }
 
-    // بررسی تکراری بودن
     if (usedPhones.includes(phone)) {
       alert("❌ این شماره موبایل قبلاً ثبت شده است!");
       phoneInput.focus();
@@ -203,24 +210,21 @@
       return;
     }
 
-    // تولید کد یونیک
     let prefix = "S";
     if (jobSelect.value === "doctor") prefix = "D";
     else if (jobSelect.value === "nurse") prefix = "N";
+
     const tempCode = Math.random().toString(36).substring(2, 8).toUpperCase();
     const finalCode = prefix + "-" + tempCode;
 
-    // نمایش پاپ‌آپ
     popupCode.textContent = finalCode;
     popup.style.display = "block";
 
-    // ذخیره شماره‌ها برای جلوگیری از تکراری شدن
     usedPhones.push(phone);
     usedIdNumbers.push(idNumber);
     localStorage.setItem("usedPhones", JSON.stringify(usedPhones));
     localStorage.setItem("usedIdNumbers", JSON.stringify(usedIdNumbers));
 
-    // ارسال به گوگل شیت
     fetch(SHEET_URL, {
       method: "POST",
       body: new URLSearchParams({ fullName, phone, idNumber, job, finalCode })
@@ -232,6 +236,13 @@
 
   closePopup.addEventListener("click", () => { popup.style.display = "none"; });
   window.onclick = (event) => { if (event.target === popup) popup.style.display = "none"; };
+
+  // دکمه کپی
+  copyBtn.addEventListener("click", () => {
+    navigator.clipboard.writeText(popupCode.textContent).then(() => {
+      alert("✅ کد یونیک کپی شد!");
+    }).catch(() => alert("❌ خطا در کپی کردن کد!"));
+  });
 </script>
 
 </body>
