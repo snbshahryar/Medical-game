@@ -109,6 +109,21 @@
     from { opacity: 0; transform: translateY(-5px); }
     to { opacity: 1; transform: translateY(0); }
   }
+
+  /* 📱 ریسپانسیو برای موبایل */
+  @media (max-width: 600px) {
+    .popup-content {
+      width: 85%;
+      padding: 18px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      margin: 40% auto;
+    }
+    .popup h2 { font-size: 18px; }
+    .popup p { font-size: 13px; line-height: 1.5; }
+    #popupCode { font-size: 18px !important; }
+    #copyBtn { padding: 5px 8px; font-size: 13px; }
+  }
 </style>
 </head>
 <body>
@@ -181,12 +196,10 @@ function normalizeDigits(input) {
   value = value.replace(/[٠-٩]/g, d => '0123456789'[arabic.indexOf(d)]);
   return value;
 }
-
 function isValidIranMobile(num) {
   return /^09[0-9]{9}$/.test(num);
 }
 
-// تبدیل لحظه‌ای شماره موبایل به اعداد انگلیسی
 phoneInput.addEventListener("input", () => {
   phoneInput.value = normalizeDigits(phoneInput.value).replace(/\D/g, '').slice(0, 11);
 });
@@ -197,7 +210,6 @@ jobSelect.addEventListener("change", () => {
   otherJobInput.style.display = (jobSelect.value === "other") ? "block" : "none";
 });
 
-// اگر قبلاً ثبت کرده باشد
 const savedCode = localStorage.getItem("uniqueCode");
 if (savedCode) {
   submitBtn.disabled = true;
@@ -207,7 +219,6 @@ if (savedCode) {
 
 form.addEventListener("submit", (e) => {
   e.preventDefault();
-
   if (localStorage.getItem("uniqueCode")) {
     alert("شما قبلاً ثبت‌نام کرده‌اید و کد یونیک دریافت کرده‌اید.");
     return;
@@ -260,6 +271,12 @@ copyBtn.addEventListener("click", () => {
   });
 });
 closePopup.addEventListener("click", () => popup.style.display = "none");
+
+/* 🚫 جلوگیری از بازگشت به صفحه قبل */
+history.pushState(null, null, location.href);
+window.onpopstate = function () {
+  history.go(1);
+};
 </script>
 
 </body>
