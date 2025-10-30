@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>بازی پیدا کردن دارو</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600&display=swap" rel="stylesheet">
+<style>
+body { font-family: 'Vazirmatn', sans-serif; direction: rtl; background: #f0f7ff; text-align:center; padding:20px; }
+h1 { color: #0d6efd; margin-bottom:10px; }
+
+#grid {
+  display: grid;
+  grid-template-columns: repeat(10, 40px);
+  grid-gap: 5px;
+  margin: 20px auto;
+  justify-content: center;
+  direction: ltr;
+}
+
+.cell {
+  width:40px; height:40px;
+  border:1px solid #bbb;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:bold; background:#fff; cursor:pointer;
+  user-select:none; border-radius:6px;
+  transition: background 0.2s ease; text-align:center;
+}
+.cell.selected { background:#ffe58f; }
+.cell.found { background:#b6f0b6; color:#065f06; }
+
+#wordList { margin-top:20px; font-size:18px; text-align:center; }
+#wordList span { display:inline-block; background:#eee; padding:5px 10px; margin:5px; border-radius:6px; }
+#wordList .foundWord { background:#b6f0b6; color:#065f06; font-weight:bold; }
+
+#timer { font-size:20px; margin-top:5px; color:#333; }
+
+.popup { position:fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center; z-index:999; }
+.popup-content { background:white; padding:30px; border-radius:20px; text-align:center; box-shadow:0 0 15px rgba(0,0,0,0.2); animation: popIn 0.3s ease; font-family:'Vazirmatn',sans-serif; }
+.popup-content button { margin:10px; font-size:18px; padding:10px 25px; border:none; border-radius:8px; cursor:pointer; background:#0d6efd; color:white; font-weight:600; font-family:'Vazirmatn',sans-serif; }
+
+@keyframes popIn { from { transform: scale(0.8); opacity:0; } to { transform: scale(1); opacity:1; } }
+
+@media (max-width: 600px){
+  #grid { 
+    grid-template-columns: repeat(10, minmax(0,1fr));
+    max-width: 95%;
+    gap: 3px;
+    margin: 0 auto;
+  }
+  .cell { width: 100%; aspect-ratio:1/1; font-size: clamp(12px, 2vw, 18px); }
+  h1 { font-size: 22px; }
+  #wordList { font-size:16px; }
+  .popup-content { padding:20px; }
+  .popup-content button { font-size:16px; padding:8px 15px; }
+}
+</style>
+</head>
+<body>
+
+<div id="timer">⏱️ زمان باقی‌مانده: 90 ثانیه</div>
+<div id="grid"></div>
+<div id="wordList"></div>
+
+<script>
+const gridData = [
+  ['A','R','A','N','O','L','A','Z','E','T'],
+  ['X','M','Q','U','Z','B','S','A','B','I'],
+  ['A','P','I','R','A','X','P','C','D','C'],
+  ['B','N','R','V','L','C','A','E','F','A'],
+  ['I','O','S','W','T','D','V','G','H','L'],
+  ['N','P','T','X','E','E','I','I','J','I'],
+  ['G','E','Y','Z','L','F','X','K','L','X'],
+  ['H','I','J','K','Y','L','M','N','O','P'],
+  ['S','R','Q','T','S','U','V','W','B','A'],
+  ['C','Z','Y','X','E','D','E','F','G','H']
+];
+
+const words = ["APIRAX","ASPAVIX","ALTELYSE","RANOLAZE","AXABIN","TICALIX"];
+let foundWords = [], selectedCells = [], timeLeft = 90, timer, finalCode="";
+let hasWon = false; // پرچم برنده شدن
+let continueClicked = false; // پرچم ادامه بازی بعد از 3 دارو
+
+const grid = document.getElementById("grid");
+const wordList = document.getElementById("wordList");
+
+// ساخت جدول
+gridData.forEach((row,i)=>{ row.forEach((letter,j)=>{
+  const cell=document.createElement("div");
+  cell.className="cell"; cell.textContent=letter;
+  cell.dataset.row=i; cell.dataset.col=j;
+  grid.appendChild(cell);
+})});
+
+// ساخت لیست داروها
+words.forEach(w=>{ const span=document.createElement("span"); span.textContent=w; wordList.appendChild(span); });
+
+// بروزرسانی لیست داروها
+function updateWordList(){ wordList.querySelectorAll("span").forEach(s=>{ if(foundWords.includes(s.textContent)) s.classList.add("foundWord"); })}
+
+// بررسی انتخاب‌ها
+function checkSelection(){
+  const text=selectedCells.map(c=>c.textContent).join("").toUpperCase();
+  let found=false;
+  for(const word of words){
+    if(text===word && !foundWords.includes(word)){
+      foundWords.push(word);
+      selectedCells.forEach(c=>c.classList.add("found"));
+      found=true;
+      break;
+    }
+  }
+  // حذف رنگ زرد سلول‌های اشتباه
+  selectedCells.forEach(c => { if(!c.classList.contains("found")) c.classList.remove("selected"); });
+  updateWordList();
+  checkWinCondition();
+  selectedCells=[];
+}
+
+// انتخاب با موس
+let isMouseDown=false;
+grid.addEventListener("mousedown", e=>{ if(e.target.classList.contains("cell")){ isMouseDown=true; selectedCells=[e.target]; e.target.classList.add("selected"); }});
+grid.addEventListener("mouseover", e=>{ if(isMouseDown && e.target.classList.contains("cell") && !selectedCells.includes(e.target)){ selectedCells.push(e.target); e.target.classList.add("selected"); }});
+document.addEventListener("mouseup", ()=>{ if(isMouseDown){ checkSelection(); isMouseDown=false; }});
+
+// لمس موبایل
+grid.addEventListener("touchstart", e=>{
+  const t=e.targetTouches[0];
+  const el=document.elementFromPoint(t.clientX,t.clientY);
+  if(el && el.classList.contains("cell")){ selectedCells=[el]; el.classList.add("selected"); }
+});
+grid.addEventListener("touchmove", e=>{
+  e.preventDefault();
+  const t=e.targetTouches[0];
+  const el=document.elementFromPoint(t.clientX,t.clientY);
+  if(el && el.classList.contains("cell") && !selectedCells.includes(el)){ selectedCells.push(el); el.classList.add("selected"); }
+});
+grid.addEventListener("touchend", ()=>{
+  checkSelection();
+});
+
+// بررسی شرایط برد
+function checkWinCondition(){
+  if(foundWords.length>=3 && !hasWon && !continueClicked){ showPopupChoice(); }
+  if(foundWords.length===6){ showWinnerPopup(); }
+}
+
+// پاپ‌آپ بعد از ۳ دارو
+function showPopupChoice(){
+  const popup=document.createElement("div"); popup.className="popup";
+  popup.innerHTML=`
+    <div class="popup-content">
+      <h2>🎯 عالی! سه دارو پیدا کردی!</h2>
+      <p>می‌خوای ادامه بدی یا بازی رو تموم کنی؟</p>
+      <button id="continueBtn">ادامه بازی</button>
+      <button id="finishBtn">پایان بازی</button>
+    </div>
+  `;
+  document.body.appendChild(popup);
+  document.getElementById("continueBtn").onclick=()=>{
+    popup.remove();
+    continueClicked = true;
+    hasWon = true; // بعد از ادامه بازی هم برنده محسوب شود
+  };
+  document.getElementById("finishBtn").onclick=()=>{ popup.remove(); showWinnerPopup(); };
+}
+
+// پاپ‌آپ پایان بازی و تولید کد یونیک موقت
+function showWinnerPopup(){
+  clearInterval(timer);
+  finalCode=Math.random().toString(36).substring(2,8).toUpperCase();
+  hasWon = true; 
+  const popup=document.createElement("div"); popup.className="popup";
+  popup.innerHTML=`
+    <div class="popup-content">
+      <h2>🏆 تبریک! شما بازی را تمام کردید!</h2>
+      <p>برای دریافت کد یونیک و ثبت اطلاعات، ادامه دهید.</p>
+      <button id="nextBtn">ادامه ثبت اطلاعات</button>
+    </div>
+  `;
+  document.body.appendChild(popup);
+  document.getElementById("nextBtn").onclick=()=>{
+    popup.remove();
+    localStorage.setItem("tempCode", finalCode);
+    window.location.href="info.html";
+  };
+}
+
+// تایمر
+const timerDisplay=document.getElementById("timer");
+timer=setInterval(()=>{
+  timeLeft--;
+  timerDisplay.innerText=`⏱️ زمان باقی‌مانده: ${timeLeft} ثانیه`;
+  if(timeLeft<=0){
+    clearInterval(timer);
+    if(hasWon){
+      window.location.href="info.html";
+    } else {
+      alert("⏰ زمان تمام شد! دوباره تلاش کن.");
+      location.reload();
+    }
+  }
+},1000);
+
+</script>
+</body>
+</html>

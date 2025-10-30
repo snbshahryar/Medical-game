@@ -11,122 +11,140 @@
     direction: rtl;
     background: linear-gradient(180deg, #e9f2ff, #ffffff);
     text-align: center;
-    padding: 0;
-    margin: 0;
+    padding: 10px;
     opacity: 1;
     transition: opacity 0.8s ease-in-out;
     min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
+  }
+  body.fade-out { opacity: 0; }
+
+  h2 {
+    color: #0d6efd;
+    margin-bottom: 5px;
   }
 
-  body.fade-out {
-    opacity: 0;
+  p {
+    font-size: 18px;
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 15px;
   }
 
-  .logo-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 20px; /* فاصله بین لوگو و کارت سفید */
-  }
-
-  .logo-wrapper img {
-    width: 180px;
-    height: auto;
+  .brand {
+    color: #0d6efd;
+    font-weight: bold;
   }
 
   .container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    width: 100%;
+    justify-content: flex-start;
+    margin-top: 20px;
   }
 
   .rules {
     background: #fff;
-    padding: 30px 40px;
+    display: block;
+    padding: 20px 30px;
     border-radius: 16px;
     box-shadow: 0 0 15px rgba(0,0,0,0.1);
-    text-align: center;
+    text-align: right;
     max-width: 600px;
+    position: relative;
     width: 90%;
   }
 
-  h1 {
-    color: black;
-    font-size: 28px;
-    margin: 0;
+  .rules-logo {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 170px;
+    height: auto;
+  }
+
+  ul {
+    text-align: right;
+    font-size: 17px;
+    color: #444;
+    margin: 70px 0 0 0;
+    padding: 0;
+    list-style: inside;
+  }
+
+  li { margin-bottom: 8px; }
+
+  button {
+    margin-top: 25px;
+    font-size: 20px;
+    padding: 15px 40px;
+    background: #0d6efd;
+    border: none;
+    border-radius: 10px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 600;
+    font-family: 'Vazir', sans-serif;
+  }
+
+  button:hover {
+    background: #084298;
+    transform: scale(1.05);
   }
 
   .tagline {
-    margin-top: 20px;
+    margin-top: 10px;
     color: #0d6efd;
     font-weight: bold;
     font-size: 18px;
   }
 
-  /* 📱 ریسپانسیو برای موبایل */
+  /* ریسپانسیو برای موبایل */
   @media (max-width: 600px) {
-    .logo-wrapper img {
-      width: 120px;
-    }
-
-    .rules {
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.08);
-      width: 90%;
-    }
-
-    h1 {
-      font-size: 20px;
-    }
-
-    .tagline {
-      font-size: 16px;
-      margin-top: 15px;
-    }
-  }
-
-  /* برای تبلت‌ها */
-  @media (min-width: 601px) and (max-width: 900px) {
-    .logo-wrapper img {
-      width: 150px;
-    }
-
-    h1 {
-      font-size: 24px;
-    }
+    h1 { font-size: 22px; }
+    p { font-size: 16px; }
+    .rules { padding: 15px 15px; width: 90%; }
+    .rules-logo { top: 10px; left: 10px; width: 100px; }
+    ul { font-size: 15px; margin-top: 60px; }
+    button { font-size: 16px; padding: 10px 25px; }
+    .tagline { font-size: 16px; margin-top: 10px; }
   }
 </style>
 </head>
 <body>
 
-  <!-- 🔹 لوگو بالای کارت سفید و وسط چین -->
-  <div class="logo-wrapper">
-    <img src="https://raw.githubusercontent.com/snbshahryar/medical-game/main/Picture1.png" 
-         alt="لوگو آرنا حیات دانش">
+<h2>Find The Brand<br>
+  Win  The Grand</h2>
+
+
+
+<div class="container">
+  <div class="rules">
+    <!-- لوگو سمت چپ بالای کادر -->
+    <img src="https://raw.githubusercontent.com/snbshahryar/medical-game/main/Picture1.png" alt="لوگو آرنا حیات دانش" class="rules-logo">
+
+    <h3>📋 قوانین بازی:</h3>
+    <ul>
+      <li>در جدول ۱۰×۱۰ داروهایی پنهان شده‌اند.</li>
+      <li>با نگه داشتن انگشت یا ماوس روی حروف، نام داروها را انتخاب کنید.</li>
+      <li>داروها می‌توانند به‌صورت افقی (چپ به راست) یا عمودی (بالا به پایین) باشند.</li>
+      <li>برای هر بازی، شما <b>۹۰ ثانیه</b> فرصت دارید.</li>
+      <li>اگر ۳ دارو پیدا کنید، می‌توانید بین ادامه بازی یا پایان آن یکی را انتخاب کنید.</li>
+      <li>اگر پایان را بزنید، بعد از ورود اطلاعات یک <b>کد یونیک جایزه</b> دریافت می‌کنید 🎁</li>
+    </ul>
   </div>
 
-  <div class="container">
-    <div class="rules">
-      <h1>زمان شرکت در بازی به پایان رسید</h1>
-    </div>
-    <div class="tagline">Health First Always</div>
-  </div>
+  <button id="startBtn">شروع بازی 🚀</button>
+  <div class="tagline">Health First Always</div>
+</div>
 
 <script>
   const startBtn = document.getElementById("startBtn");
-  if (startBtn) {
-    startBtn.addEventListener("click", () => {
-      document.body.classList.add("fade-out");
-      setTimeout(() => { window.location.href = "game.html"; }, 800);
-    });
-  }
+  startBtn.addEventListener("click", () => {
+    document.body.classList.add("fade-out");
+    setTimeout(() => { window.location.href = "game.html"; }, 800);
+  });
 </script>
 
 </body>
