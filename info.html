@@ -17,21 +17,17 @@ body {
   position: relative;
   min-height: 100vh;
 }
-
-/* لایه شفاف روی بک‌گراند */
 .overlay {
   position: fixed;
   top: 0; left: 0; width: 100%; height: 100%;
   background: rgba(255, 255, 255, 0.5);
   z-index: 0;
 }
-
 h1 {
   color: #0d6efd;
   position: relative;
   z-index: 1;
 }
-
 form {
   position: relative;
   z-index: 1;
@@ -43,7 +39,6 @@ form {
   border-radius: 20px;
   box-shadow: 0 0 15px rgba(0,0,0,0.1);
 }
-
 label { display: block; margin: 10px 0 5px; font-weight: 600; }
 input, select {
   width: 250px;
@@ -53,8 +48,6 @@ input, select {
   margin-bottom: 10px;
   font-family: 'Vazirmatn', sans-serif;
 }
-#otherJob { display: none; }
-
 button {
   font-size: 18px;
   padding: 10px 20px;
@@ -72,8 +65,6 @@ button:hover {
   background: #084ed1;
   transform: scale(1.05);
 }
-
-/* ===== پاپ‌آپ ===== */
 .popup {
   display: none;
   position: fixed;
@@ -99,7 +90,6 @@ button:hover {
 .popup h2 { color: #0d6efd; margin-bottom: 10px; }
 .popup p { color: #000; line-height: 1.6; font-size: 15px; }
 .popup a { color: #0d6efd; text-decoration: none; }
-
 #codeContainer {
   display: flex;
   justify-content: center;
@@ -122,7 +112,6 @@ button:hover {
   transition: transform 0.2s;
 }
 #copyIcon:hover { transform: scale(1.2); }
-
 @media (max-width: 600px) {
   .popup-content { width: 85%; padding: 18px 20px; border-radius: 10px; font-size: 14px; margin: 40% auto; }
   .popup h2 { font-size: 18px; }
@@ -151,19 +140,18 @@ button:hover {
   <label>شماره نظام:</label>
   <input type="text" id="idNumber" required placeholder="فقط اعداد">
 
-  <label>شغل:</label>
-  <select id="job" required>
+  <label>تخصص:</label>
+  <select id="specialty" required>
     <option value="">انتخاب کنید</option>
-    <option value="doctor">پزشک</option>
-    <option value="nurse">پرستار</option>
-    <option value="other">سایر</option>
+    <option value="قلب">قلب</option>
+    <option value="غدد">غدد</option>
+    <option value="داخلی">داخلی</option>
+    <option value="دیابتولوژی">دیابتولوژی</option>
   </select>
-  <input type="text" id="otherJob" placeholder="لطفا شغل خود را وارد کنید">
 
   <button type="submit">ثبت و دریافت کد یونیک</button>
 </form>
 
-<!-- پاپ‌آپ نمایش کد یونیک -->
 <div id="popup" class="popup">
   <div class="popup-content">
     <h2>🎉 کد یونیک شما</h2>
@@ -180,81 +168,78 @@ button:hover {
 </div>
 
 <script>
-  history.pushState(null, null, location.href);
-  window.onpopstate = () => { history.go(1); };
+history.pushState(null, null, location.href);
+window.onpopstate = () => { history.go(1); };
 
-  const jobSelect = document.getElementById("job");
-  const otherJobInput = document.getElementById("otherJob");
-  const idInput = document.getElementById("idNumber");
-  const phoneInput = document.getElementById("phone");
-  const form = document.getElementById("infoForm");
-  const popup = document.getElementById("popup");
-  const popupCode = document.getElementById("popupCode");
-  const copyIcon = document.getElementById("copyIcon");
+const specialtySelect = document.getElementById("specialty");
+const idInput = document.getElementById("idNumber");
+const phoneInput = document.getElementById("phone");
+const form = document.getElementById("infoForm");
+const popup = document.getElementById("popup");
+const popupCode = document.getElementById("popupCode");
+const copyIcon = document.getElementById("copyIcon");
 
-  const SHEET_URL = "https://script.google.com/macros/s/AKfycbwPEsKcfNCqokFU_jpCR4oKdLdbwhcBAPknLiwMqUOreafENmvJSmnbWAfyn06eLAhN/exec";
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbwPEsKcfNCqokFU_jpCR4oKdLdbwhcBAPknLiwMqUOreafENmvJSmnbWAfyn06eLAhN/exec"; // جایگزین با URL اسکریپت خودت
 
-  jobSelect.addEventListener("change", () => {
-    otherJobInput.style.display = (jobSelect.value === "other") ? "block" : "none";
-  });
+function normalizePhone(input) {
+  let value = input.replace(/\s|-/g, '');
+  const persian = '۰۱۲۳۴۵۶۷۸۹';
+  const arabic  = '٠١٢٣٤٥٦٧٨٩';
+  value = value.replace(/[۰-۹]/g, d => '0123456789'[persian.indexOf(d)]);
+  value = value.replace(/[٠-٩]/g, d => '0123456789'[arabic.indexOf(d)]);
+  return value;
+}
 
-  function normalizePhone(input) {
-    let value = input.replace(/\s|-/g, '');
-    const persian = '۰۱۲۳۴۵۶۷۸۹';
-    const arabic  = '٠١٢٣٤٥٦٧٨٩';
-    value = value.replace(/[۰-۹]/g, d => '0123456789'[persian.indexOf(d)]);
-    value = value.replace(/[٠-٩]/g, d => '0123456789'[arabic.indexOf(d)]);
-    return value;
+function isValidIranMobile(num) { 
+  return /^09\d{9}$/.test(num); 
+}
+
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  const fullName = document.getElementById("fullName").value.trim();
+  let idNumber = idInput.value.trim();
+  let specialty = specialtySelect.value;
+
+  if (!/^\d+$/.test(idNumber)) {
+    alert("❌ شماره نظام فقط می‌تواند شامل اعداد باشد!");
+    idInput.focus(); 
+    return;
   }
-  function isValidIranMobile(num) { return /^09\d{9}$/.test(num); }
 
-  const usedPhones = JSON.parse(localStorage.getItem("usedPhones") || "[]");
-  const usedIdNumbers = JSON.parse(localStorage.getItem("usedIdNumbers") || "[]");
+  let phone = normalizePhone(phoneInput.value.trim());
+  if (!isValidIranMobile(phone)) {
+    alert("❌ لطفاً شماره موبایل معتبر وارد کنید (فرمت صحیح: 09xxxxxxxxx)");
+    phoneInput.focus(); 
+    return;
+  }
 
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const fullName = document.getElementById("fullName").value.trim();
-    let idNumber = idInput.value.trim();
-    let job = jobSelect.value;
-    if (job === "other") job = otherJobInput.value.trim() || "other";
+  const finalCode = Math.random().toString(36).substring(2, 8).toUpperCase();
 
-    if (!/^\d+$/.test(idNumber)) {
-      alert("❌ شماره نظام فقط می‌تواند شامل اعداد باشد!");
-      idInput.focus(); return;
-    }
+  popupCode.textContent = finalCode;
+  popup.style.display = "block";
 
-    let phone = normalizePhone(phoneInput.value.trim());
-    if (!isValidIranMobile(phone)) {
-      alert("❌ لطفاً شماره موبایل معتبر وارد کنید (فرمت صحیح: 09xxxxxxxxx)");
-      phoneInput.focus(); return;
-    }
+  // ارسال اطلاعات به گوگل شیت با ستون job
+  fetch(SHEET_URL, {
+    method: "POST",
+    body: new URLSearchParams({ 
+      fullName, 
+      phone, 
+      idNumber, 
+      job: specialty, // ← تخصص به ستون job ارسال می‌شود
+      finalCode 
+    })
+  })
+  .then(r => r.json())
+  .then(data => console.log("نتیجه:", data))
+  .catch(err => console.error("خطا:", err));
+});
 
-    if (usedPhones.includes(phone)) { alert("❌ این شماره موبایل قبلاً ثبت شده است!"); phoneInput.focus(); return; }
-    if (usedIdNumbers.includes(idNumber)) { alert("❌ این شماره نظام قبلاً ثبت شده است!"); idInput.focus(); return; }
-
-    let prefix = "S";
-    if (jobSelect.value === "doctor") prefix = "D";
-    else if (jobSelect.value === "nurse") prefix = "N";
-    const tempCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-    const finalCode = prefix + "-" + tempCode;
-
-    popupCode.textContent = finalCode;
-    popup.style.display = "block";
-
-    usedPhones.push(phone);
-    usedIdNumbers.push(idNumber);
-    localStorage.setItem("usedPhones", JSON.stringify(usedPhones));
-    localStorage.setItem("usedIdNumbers", JSON.stringify(usedIdNumbers));
-
-    fetch(SHEET_URL, { method: "POST", body: new URLSearchParams({ fullName, phone, idNumber, job, finalCode }) })
-      .then(r => r.json()).then(data => console.log("نتیجه:", data)).catch(err => console.error("خطا:", err));
-  });
-
-  copyIcon.addEventListener("click", () => {
-    navigator.clipboard.writeText(popupCode.textContent)
-    .then(() => alert("✅ کد یونیک کپی شد!"))
-    .catch(() => alert("❌ خطا در کپی کردن کد!"));
-  });
+copyIcon.addEventListener("click", () => {
+  navigator.clipboard.writeText(popupCode.textContent)
+  .then(() => alert("✅ کد یونیک کپی شد!"))
+  .catch(() => alert("❌ خطا در کپی کردن کد!"));
+});
 </script>
 
 </body>

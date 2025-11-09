@@ -33,6 +33,14 @@
 
   body.fade-out { opacity: 0; }
 
+  .logo-top {
+    position: relative;
+    z-index: 2;
+    width: 250px;
+    height: auto;
+    margin-bottom: 15px;
+  }
+
   .container {
     position: relative;
     z-index: 1;
@@ -40,27 +48,18 @@
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    margin-top: 20px;
   }
 
   .rules {
     background: rgba(255,255,255,0.95);
     display: block;
-    padding: 20px 30px;
+    padding: 25px 35px;
     border-radius: 16px;
     box-shadow: 0 0 15px rgba(0,0,0,0.1);
     text-align: right;
     max-width: 600px;
     position: relative;
     width: 90%;
-  }
-
-  .rules-logo {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    width: 170px;
-    height: auto;
   }
 
   h3 {
@@ -74,7 +73,7 @@
     text-align: right;
     font-size: 17px;
     color: #444;
-    margin: 70px 0 0 0;
+    margin: 10px 0 0 0;
     padding: 0;
     list-style: inside;
   }
@@ -111,9 +110,9 @@
 
   @media (max-width: 600px) {
     h3 { font-size: 20px; }
-    ul { font-size: 15px; margin-top: 60px; }
+    ul { font-size: 15px; }
     button { font-size: 17px; padding: 10px 25px; }
-    .rules-logo { width: 100px; }
+    .logo-top { width: 130px; margin-bottom: 10px; }
   }
 </style>
 </head>
@@ -121,20 +120,21 @@
 
 <div class="overlay"></div>
 
+<!-- ✅ لوگوی آرنا بیرون از کادر و وسط -->
+<img src="https://raw.githubusercontent.com/snbshahryar/medical-game/main/Picture1.png" class="logo-top" alt="Arena Logo">
+
 <div class="container">
   <div class="rules">
-    <img src="https://raw.githubusercontent.com/snbshahryar/medical-game/main/Picture1.png" class="rules-logo">
-
-    <h3>📋 قوانین بازی:</h3>
+    <h3>📋 راهنما:</h3>
     <ul>
-      <li>در این مرحله باید به ۱۰ سؤال چهارگزینه‌ای پاسخ دهید.</li>
+      <li>ابتدا به ۱۰ سؤال چهارگزینه‌ای پاسخ دهید.</li>
       <li>هر سؤال تنها یک پاسخ صحیح دارد.</li>
       <li>بعد از پاسخ دادن به سؤال دهم، به مرحله ثبت اطلاعات هدایت می‌شوید.</li>
       <li>ثبت اطلاعات برای شرکت در قرعه‌کشی الزامی است 🎁</li>
     </ul>
   </div>
 
-  <button id="startBtn">شروع بازی 🚀</button>
+  <button id="startBtn">شروع 🚀</button>
   <div class="tagline">Health First Always</div>
 </div>
 
@@ -145,5 +145,6 @@
     setTimeout(() => { window.location.href = "game.html"; }, 800);
   });
 </script>
+
 </body>
 </html>
