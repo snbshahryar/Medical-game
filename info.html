@@ -143,10 +143,10 @@ button:hover {
   <label>تخصص:</label>
   <select id="specialty" required>
     <option value="">انتخاب کنید</option>
-    <option value="قلب">قلب</option>
     <option value="غدد">غدد</option>
-    <option value="داخلی">داخلی</option>
     <option value="دیابتولوژی">دیابتولوژی</option>
+    <option value="داخلی">داخلی</option>
+    <option value="قلب">قلب</option>
   </select>
 
   <button type="submit">ثبت و دریافت کد یونیک</button>
@@ -162,7 +162,7 @@ button:hover {
       </svg>
     </div>
     <p>جهت نهایی شدن مراحل قرعه کشی لازم است کد یونیک خود را پس از کپی نمودن زیر پست اینستاگرامی زیر کامنت کنید<br>
-      <a href="https://www.instagram.com/p/DQMBYroDajZ/?igsh=MW9yOXFxNjZ5bDc5eA==" target="_blank">لینک پست</a>
+      <a href="https://www.instagram.com/p/DQ6ZvyLjTnv/?igsh=aWh6amJva2tjd242" target="_blank">لینک پست</a>
     </p>
   </div>
 </div>
@@ -179,7 +179,7 @@ const popup = document.getElementById("popup");
 const popupCode = document.getElementById("popupCode");
 const copyIcon = document.getElementById("copyIcon");
 
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbwPEsKcfNCqokFU_jpCR4oKdLdbwhcBAPknLiwMqUOreafENmvJSmnbWAfyn06eLAhN/exec"; // جایگزین با URL اسکریپت خودت
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbwPEsKcfNCqokFU_jpCR4oKdLdbwhcBAPknLiwMqUOreafENmvJSmnbWAfyn06eLAhN/exec";
 
 function normalizePhone(input) {
   let value = input.replace(/\s|-/g, '');
@@ -214,19 +214,19 @@ form.addEventListener("submit", (e) => {
     return;
   }
 
-  const finalCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+  // ✅ اضافه کردن پیشوند B-X به ابتدای کد یونیک
+  const finalCode = "B-X" + Math.random().toString(36).substring(2, 8).toUpperCase();
 
   popupCode.textContent = finalCode;
   popup.style.display = "block";
 
-  // ارسال اطلاعات به گوگل شیت با ستون job
   fetch(SHEET_URL, {
     method: "POST",
     body: new URLSearchParams({ 
       fullName, 
       phone, 
       idNumber, 
-      job: specialty, // ← تخصص به ستون job ارسال می‌شود
+      job: specialty, 
       finalCode 
     })
   })
